@@ -23,18 +23,24 @@ export function OAuthDebug() {
 
 🌐 Domínio Atual: ${config.baseUrl}
 
-📋 URLs de Callback para configurar nos provedores:
+📋 COPIE ESTAS URLs EXATAS para os provedores:
 
-🐙 GitHub:
+🐙 GitHub (Authorization callback URL):
 ${config.callbackUrls.github}
 
-🔍 Google:
+🔍 Google (Authorized redirect URIs):
 ${config.callbackUrls.google}
 
 ${isProduction ? 
-  '⚠️ PRODUÇÃO: Certifique-se de que estas URLs estão configuradas nos provedores OAuth!' : 
-  '💡 DESENVOLVIMENTO: Adicione também as URLs de produção nos provedores.'
-}`
+  '⚠️ PRODUÇÃO: Cole estas URLs EXATAMENTE como mostrado!' : 
+  '💡 DESENVOLVIMENTO: Adicione também as URLs de produção.'
+}
+
+🔧 Passos:
+1. Google: console.cloud.google.com → APIs & Services → Credentials
+2. GitHub: github.com/settings/developers
+3. Cole a URL exata mostrada acima
+4. Salve e aguarde alguns minutos`
     
     alert(message)
   }
