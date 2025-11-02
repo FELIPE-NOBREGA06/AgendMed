@@ -5,19 +5,38 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export function OAuthDebug() {
   const checkOAuthConfig = () => {
+    const baseUrl = window.location.origin
+    const isProduction = baseUrl.includes('vercel.app') || baseUrl.includes('agend-med')
+    
     const config = {
-      githubId: process.env.NEXT_PUBLIC_GITHUB_ID ? '✅ Configurado' : '❌ Não configurado',
-      googleId: process.env.NEXT_PUBLIC_GOOGLE_ID ? '✅ Configurado' : '❌ Não configurado',
-      authSecret: process.env.NEXT_PUBLIC_AUTH_SECRET ? '✅ Configurado' : '❌ Não configurado',
-      baseUrl: window.location.origin,
+      environment: isProduction ? '🌐 Produção' : '🔧 Desenvolvimento',
+      baseUrl: baseUrl,
       callbackUrls: {
-        github: `${window.location.origin}/api/auth/callback/github`,
-        google: `${window.location.origin}/api/auth/callback/google`,
+        github: `${baseUrl}/api/auth/callback/github`,
+        google: `${baseUrl}/api/auth/callback/google`,
       }
     }
     
     console.log('🔍 Configuração OAuth:', config)
-    alert(`Configuração OAuth:\n\nGitHub ID: ${config.githubId}\nGoogle ID: ${config.googleId}\n\nURLs de Callback:\nGitHub: ${config.callbackUrls.github}\nGoogle: ${config.callbackUrls.google}`)
+    
+    const message = `🔍 Debug OAuth - ${config.environment}
+
+🌐 Domínio Atual: ${config.baseUrl}
+
+📋 URLs de Callback para configurar nos provedores:
+
+🐙 GitHub:
+${config.callbackUrls.github}
+
+🔍 Google:
+${config.callbackUrls.google}
+
+${isProduction ? 
+  '⚠️ PRODUÇÃO: Certifique-se de que estas URLs estão configuradas nos provedores OAuth!' : 
+  '💡 DESENVOLVIMENTO: Adicione também as URLs de produção nos provedores.'
+}`
+    
+    alert(message)
   }
 
   return (
