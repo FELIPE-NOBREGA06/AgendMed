@@ -19,7 +19,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientSecret: process.env.AUTH_GOOGLE_SECRET!,
     })
   ],
+  pages: {
+    error: '/auth/error',
+  },
   callbacks: {
+    signIn: async ({ user, account, profile }) => {
+      // Permitir login sempre (resolve OAuthAccountNotLinked)
+      return true;
+    },
     session: async ({ session, token }) => {
       if (session?.user && token?.sub) {
         session.user.id = token.sub;
@@ -31,6 +38,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.uid = user.id;
       }
       return token;
+    },
+  },
+  events: {
+    linkAccount: async ({ user, account, profile }) => {
+      console.log('Account linked:', { user: user.email, provider: account.provider });
     },
   },
   debug: process.env.NODE_ENV === 'development',
