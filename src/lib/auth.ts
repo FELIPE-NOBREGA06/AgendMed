@@ -8,6 +8,7 @@ import Google from 'next-auth/providers/google'
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma) as Adapter,
   trustHost: true,
+  secret: process.env.AUTH_SECRET,
   providers: [
     GitHub({
       clientId: process.env.AUTH_GITHUB_ID!,
