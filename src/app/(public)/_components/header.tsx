@@ -23,8 +23,12 @@ export function Header() {
     { href: "#profissionais", label: "Profissionais" },
   ]
 
-  async function handleLogin() {
+  async function handleLoginGoogle() {
     await handleRegister("google")
+  }
+
+  async function handleLoginGitHub() {
+    await handleRegister("github")
   }
 
   const NavLinks = () => (
@@ -52,10 +56,16 @@ export function Header() {
           Acessar clinica
         </Link>
       ) : (
-        <Button onClick={handleLogin}>
-          <LogIn />
-          Portal da clinica
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={handleLoginGoogle} variant="outline">
+            <LogIn className="w-4 h-4" />
+            Google
+          </Button>
+          <Button onClick={handleLoginGitHub}>
+            <LogIn className="w-4 h-4" />
+            GitHub
+          </Button>
+        </div>
       )}
     </>
   )
