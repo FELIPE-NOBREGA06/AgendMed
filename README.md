@@ -123,8 +123,11 @@ STRIPE_CANCEL_URL="http://localhost:3000/dashboard/plans"
 # Gerar cliente Prisma
 npm run db:generate
 
-# Executar migrações
+# Aplicar schema (desenvolvimento)
 npm run db:push
+
+# OU resetar banco se houver conflitos
+npm run db:reset
 ```
 
 ### 5. Configure o Stripe
@@ -235,6 +238,29 @@ npm run test:coverage
 # Testes E2E
 npm run test:e2e
 ```
+
+## 🚨 Troubleshooting
+
+### Erro de Migração no Deploy
+Se encontrar erro "type Plan already exists":
+
+```bash
+# Opção 1: Resetar banco (desenvolvimento)
+npm run db:reset
+
+# Opção 2: Usar db:push em vez de migrate
+npm run build  # Já configurado para usar db:push
+```
+
+### Problemas com Variáveis de Ambiente
+1. Verifique se todas as variáveis estão configuradas
+2. Use o componente de debug em `/dashboard/plans`
+3. Confirme se o `.env` não está no Git
+
+### Erro no Stripe
+1. Verifique as chaves públicas e secretas
+2. Configure os webhooks corretamente
+3. Use `npm run stripe:setup` para criar produtos
 
 ## 📈 Roadmap
 
