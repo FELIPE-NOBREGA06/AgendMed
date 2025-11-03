@@ -4,8 +4,9 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 import { Adapter } from "next-auth/adapters"
 import GitHub from "next-auth/providers/github"
 import Google from 'next-auth/providers/google'
+import type { Provider } from "next-auth/providers"
 
-const providers = [
+const providers: Provider[] = [
   GitHub({
     clientId: process.env.AUTH_GITHUB_ID!,
     clientSecret: process.env.AUTH_GITHUB_SECRET!,
