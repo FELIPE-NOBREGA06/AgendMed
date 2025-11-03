@@ -16,19 +16,34 @@ export async function POST(request: NextRequest) {
     const isVercel = process.env.VERCEL === '1'
     
     if (isVercel) {
-      console.log('🚨 Detectado ambiente Vercel - WhatsApp Web.js não é suportado')
-      return NextResponse.json({
-        success: false,
-        error: 'WhatsApp Web.js não é suportado no Vercel devido às limitações do ambiente serverless.',
-        message: 'Para usar WhatsApp, você precisa de um servidor dedicado ou VPS.',
-        alternatives: [
-          'Use um servidor VPS (DigitalOcean, AWS EC2, etc.)',
-          'Use Railway, Render ou Heroku para deploy',
-          'Configure um webhook externo para WhatsApp Business API',
-          'Use uma solução como Twilio WhatsApp API'
-        ],
-        documentation: 'https://docs.vercel.com/functions/serverless-functions/limitations'
-      }, { status: 501 })
+      console.log('🔌 Detectado ambiente Vercel - usando versão compatível')
+      
+      // Redirecionar para versão compatível com Vercel
+      const compatibleResponse = await fetch(`${request.nextUrl.origin}/api/whatsapp/vercel-compatible`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action: 'connect' })
+      })
+      
+      if (compatibleResponse.ok) {
+        const data = await compatibleResponse.json()
+        return NextResponse.json(data)
+      } else {
+        return NextResponse.json({
+          success: false,
+          error: 'WhatsApp Web.js não é suportado no Vercel.',
+          message: 'Usando versão de demonstração. Para WhatsApp real, use Railway ou Render.',
+          alternatives: [
+            'Deploy no Railway (recomendado)',
+            'Deploy no Render (gratuito)',
+            'Use WhatsApp Business API',
+            'Configure servidor VPS próprio'
+          ],
+          documentation: '/docs/RAILWAY_DEPLOY.md'
+        }, { status: 501 })
+      }
     }
 
     const { botType = 'webjs' } = await request.json()

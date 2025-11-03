@@ -69,8 +69,8 @@ export default function WhatsAppPage() {
         
         // Verificar se é erro do Vercel
         if (response.status === 501) {
-          toast.error('WhatsApp não suportado no Vercel', {
-            description: 'Use um servidor dedicado para WhatsApp Web.js'
+          toast.error('WhatsApp limitado no Vercel', {
+            description: 'Usando versão de demonstração'
           })
           
           // Mostrar alternativas
@@ -88,6 +88,28 @@ export default function WhatsAppPage() {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const simulateConnection = async () => {
+    try {
+      const response = await fetch('/api/whatsapp/vercel-compatible', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'simulate-connection' })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setStatus({
+          connected: true,
+          phone: data.phone,
+          name: data.name
+        })
+        toast.success('Conexão simulada com sucesso!')
+      }
+    } catch (error) {
+      toast.error('Erro ao simular conexão')
     }
   }
 
@@ -114,6 +136,14 @@ export default function WhatsAppPage() {
           <p className="text-muted-foreground">
             Conecte seu WhatsApp para atendimento automático
           </p>
+          {typeof window !== 'undefined' && window.location.hostname.includes('vercel.app') && (
+            <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800">
+                ⚠️ <strong>Ambiente Vercel:</strong> WhatsApp em modo demonstração. 
+                Para WhatsApp real, use <a href="/docs/RAILWAY_DEPLOY.md" className="underline">Railway ou Render</a>.
+              </p>
+            </div>
+          )}
         </div>
         
         <Badge variant={status.connected ? "default" : "secondary"} className="text-sm">
@@ -219,15 +249,27 @@ export default function WhatsAppPage() {
                   </ol>
                 </div>
 
-                <Button 
-                  onClick={connectWhatsApp} 
-                  variant="outline" 
-                  size="sm"
-                  className="w-full"
-                >
-                  <QrCode className="w-4 h-4 mr-2" />
-                  Gerar Novo QR Code
-                </Button>
+                <div className="space-y-2">
+                  <Button 
+                    onClick={connectWhatsApp} 
+                    variant="outline" 
+                    size="sm"
+                    className="w-full"
+                  >
+                    <QrCode className="w-4 h-4 mr-2" />
+                    Gerar Novo QR Code
+                  </Button>
+                  
+                  <Button 
+                    onClick={simulateConnection} 
+                    variant="secondary" 
+                    size="sm"
+                    className="w-full"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-2" />
+                    Simular Conexão (Demo)
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
