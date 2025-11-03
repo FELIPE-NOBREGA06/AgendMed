@@ -37,7 +37,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Permitir login sempre (resolve OAuthAccountNotLinked)
         console.log('SignIn attempt:', { 
           email: user.email, 
-          provider: account?.provider 
+          provider: account?.provider,
+          accountId: account?.providerAccountId 
         });
         return true;
       } catch (error) {
