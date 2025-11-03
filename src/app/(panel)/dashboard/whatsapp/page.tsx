@@ -52,9 +52,9 @@ export default function WhatsAppPage() {
         headers: { 'Content-Type': 'application/json' }
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        
+      const data = await response.json()
+
+      if (response.ok && data.success) {
         setStatus({
           connected: false,
           qrCode: data.qrCode || null,
@@ -65,13 +65,27 @@ export default function WhatsAppPage() {
         toast.success('QR Code gerado! Escaneie com seu WhatsApp')
         
       } else {
-        const errorData = await response.json()
         toast.dismiss()
-        toast.error(errorData.error || 'Erro ao gerar QR Code')
+        
+        // Verificar se é erro do Vercel
+        if (response.status === 501) {
+          toast.error('WhatsApp não suportado no Vercel', {
+            description: 'Use um servidor dedicado para WhatsApp Web.js'
+          })
+          
+          // Mostrar alternativas
+          console.log('Alternativas:', data.alternatives)
+        } else {
+          toast.error(data.error || 'Erro ao gerar QR Code', {
+            description: data.details || 'Tente novamente'
+          })
+        }
       }
     } catch (error) {
       toast.dismiss()
-      toast.error('Erro ao conectar WhatsApp')
+      toast.error('Erro ao conectar WhatsApp', {
+        description: 'Verifique sua conexão e tente novamente'
+      })
     } finally {
       setLoading(false)
     }
