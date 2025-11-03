@@ -12,38 +12,54 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🔌 Recebida requisição de conexão WhatsApp')
 
-    // Verificar se estamos no Vercel (ambiente serverless)
-    const isVercel = process.env.VERCEL === '1'
-    
-    if (isVercel) {
-      console.log('🔌 Detectado ambiente Vercel - usando versão compatível')
+    // Tentar usar versão compatível com Vercel primeiro
+    try {
+      console.log('🔌 Tentando versão compatível com Vercel')
       
-      // Redirecionar para versão compatível com Vercel
-      const compatibleResponse = await fetch(`${request.nextUrl.origin}/api/whatsapp/vercel-compatible`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ action: 'connect' })
+      const QRCode = require('qrcode')
+      const qrData = `whatsapp://connect?demo=${Date.now()}&id=${Math.random().toString(36).substring(7)}`
+      
+      const qrCodeImage = await QRCode.toDataURL(qrData, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
       })
-      
-      if (compatibleResponse.ok) {
-        const data = await compatibleResponse.json()
-        return NextResponse.json(data)
-      } else {
-        return NextResponse.json({
-          success: false,
-          error: 'WhatsApp Web.js não é suportado no Vercel.',
-          message: 'Usando versão de demonstração. Para WhatsApp real, use Railway ou Render.',
-          alternatives: [
-            'Deploy no Railway (recomendado)',
-            'Deploy no Render (gratuito)',
-            'Use WhatsApp Business API',
-            'Configure servidor VPS próprio'
-          ],
-          documentation: '/docs/RAILWAY_DEPLOY.md'
-        }, { status: 501 })
+
+      const status = {
+        connected: false,
+        qrCode: qrCodeImage,
+        phone: null,
+        name: null,
+        lastSeen: new Date().toISOString(),
+        botType: 'vercel-demo',
+        mode: 'demo'
       }
+
+      // Salvar status
+      const { updateWhatsAppStatus } = await import('@/lib/whatsapp-utils')
+      updateWhatsAppStatus(status)
+
+      return NextResponse.json({
+        success: true,
+        message: 'QR Code de demonstração gerado!',
+        qrCode: qrCodeImage,
+        connected: false,
+        botType: 'vercel-demo',
+        mode: 'demo',
+        instructions: [
+          '📱 QR Code de demonstração gerado com sucesso',
+          '⚠️ Este é um QR Code para fins de demonstração',
+          '🚀 Para WhatsApp real, use Railway ou Render',
+          '📖 Veja a documentação para deploy completo'
+        ],
+        note: 'Modo demonstração - Para WhatsApp real, use Railway'
+      })
+
+    } catch (qrError) {
+      console.log('Erro na versão compatível, tentando versão completa:', qrError)
     }
 
     const { botType = 'webjs' } = await request.json()

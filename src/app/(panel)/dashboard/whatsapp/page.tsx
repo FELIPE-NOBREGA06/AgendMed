@@ -62,7 +62,14 @@ export default function WhatsAppPage() {
         })
         
         toast.dismiss()
-        toast.success('QR Code gerado! Escaneie com seu WhatsApp')
+        
+        if (data.mode === 'demo') {
+          toast.success('QR Code de demonstração gerado!', {
+            description: 'Para WhatsApp real, use Railway ou Render'
+          })
+        } else {
+          toast.success('QR Code gerado! Escaneie com seu WhatsApp')
+        }
         
       } else {
         toast.dismiss()
@@ -225,10 +232,18 @@ export default function WhatsAppPage() {
           <Card>
             <CardHeader>
               <CardTitle>Escaneie o QR Code</CardTitle>
+              {typeof window !== 'undefined' && window.location.hostname.includes('vercel.app') && (
+                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800">
+                    🎯 <strong>Modo Demonstração:</strong> QR Code gerado para testes. 
+                    Para WhatsApp real, use Railway.
+                  </p>
+                </div>
+              )}
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="bg-white p-6 rounded-lg border text-center">
+                <div className="bg-white p-6 rounded-lg border text-center relative">
                   <img 
                     src={status.qrCode} 
                     alt="QR Code WhatsApp" 
@@ -237,6 +252,11 @@ export default function WhatsAppPage() {
                       toast.error('Erro ao carregar QR Code')
                     }}
                   />
+                  {typeof window !== 'undefined' && window.location.hostname.includes('vercel.app') && (
+                    <div className="absolute top-2 right-2 bg-blue-500 text-white px-2 py-1 rounded text-xs">
+                      DEMO
+                    </div>
+                  )}
                 </div>
                 
                 <div className="text-sm text-muted-foreground">
