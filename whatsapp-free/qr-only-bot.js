@@ -96,10 +96,15 @@ client.on('disconnected', (reason) => {
 console.log('🔄 Inicializando cliente...');
 client.initialize();
 
-// Timeout de segurança
+// Timeout de segurança - manter ativo por mais tempo
 setTimeout(() => {
-    console.log('⏰ Timeout de 60 segundos - mantendo bot ativo');
-}, 60000);
+    console.log('⏰ Bot ativo há 5 minutos - mantendo conexão');
+}, 300000); // 5 minutos
+
+// Log de progresso
+setTimeout(() => {
+    console.log('📊 Bot ativo há 30 segundos...');
+}, 30000);
 
 // Capturar Ctrl+C
 process.on('SIGINT', () => {
