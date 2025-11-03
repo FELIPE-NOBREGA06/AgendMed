@@ -2,6 +2,9 @@ import { auth } from "@/lib/auth"
 import prisma from "@/lib/prisma"
 import { NextResponse, NextRequest } from 'next/server'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 
 /*
   Rota para buscar todos os agendamentos de uma clinica

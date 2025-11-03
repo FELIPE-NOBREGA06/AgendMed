@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getWhatsAppStatus } from '@/lib/whatsapp-utils'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     // Obter status atual do arquivo ou memória

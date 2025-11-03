@@ -3,6 +3,9 @@ import { spawn } from 'child_process'
 import path from 'path'
 import { getWhatsAppStatus, clearWhatsAppStatus } from '@/lib/whatsapp-utils'
 
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 let botProcess: any = null
 
 export async function POST(request: NextRequest) {
