@@ -12,26 +12,57 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🔌 Recebida requisição de conexão WhatsApp')
 
-    // Usar Baileys no Vercel (mais compatível)
+    // Usar WhatsApp Business API (REAL) no Vercel
     try {
-      console.log('🚀 Usando Baileys para Vercel')
+      console.log('🚀 Usando WhatsApp Business API')
       
-      // Redirecionar para API Baileys
-      const baileysResponse = await fetch(`${request.nextUrl.origin}/api/whatsapp/baileys`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ action: 'connect' })
-      })
+      // Verificar se está configurado
+      const hasBusinessConfig = process.env.WHATSAPP_BUSINESS_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID
       
-      if (baileysResponse.ok) {
-        const data = await baileysResponse.json()
-        return NextResponse.json(data)
+      if (hasBusinessConfig) {
+        // Redirecionar para Business API
+        const businessResponse = await fetch(`${request.nextUrl.origin}/api/whatsapp/business`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ action: 'get-qr' })
+        })
+        
+        if (businessResponse.ok) {
+          const data = await businessResponse.json()
+          return NextResponse.json({
+            success: true,
+            message: 'WhatsApp Business API configurado!',
+            qrCode: data.qrCode,
+            connected: false,
+            botType: 'whatsapp-business-api',
+            mode: 'production',
+            instructions: data.instructions,
+            nextSteps: data.nextSteps,
+            businessSetup: true
+          })
+        }
+      } else {
+        // Mostrar instruções de configuração
+        return NextResponse.json({
+          success: false,
+          error: 'WhatsApp Business API não configurado',
+          message: 'Configure as credenciais para usar WhatsApp real',
+          setupRequired: true,
+          instructions: [
+            '🔧 Configure WHATSAPP_BUSINESS_TOKEN no Vercel',
+            '📱 Configure WHATSAPP_PHONE_NUMBER_ID no Vercel', 
+            '🔑 Configure WHATSAPP_VERIFY_TOKEN no Vercel',
+            '📖 Veja o guia completo de configuração'
+          ],
+          setupUrl: '/dashboard/whatsapp/business',
+          documentation: '/docs/WHATSAPP_BUSINESS_SETUP.md'
+        }, { status: 400 })
       }
 
-    } catch (baileysError) {
-      console.log('Erro no Baileys, usando fallback:', baileysError)
+    } catch (businessError) {
+      console.log('Erro no Business API, usando fallback:', businessError)
     }
 
     // Fallback: QR Code simples
