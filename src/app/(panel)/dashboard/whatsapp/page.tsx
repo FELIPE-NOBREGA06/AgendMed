@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { QrCode, CheckCircle, AlertCircle, RefreshCw } from 'lucide-react'
+import { QrCode, CheckCircle, AlertCircle, RefreshCw, Send } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface WhatsAppStatus {
@@ -185,9 +185,15 @@ export default function WhatsAppPage() {
                 </p>
               </div>
             </div>
-            <div className="mt-4">
+            <div className="mt-4 space-x-2">
               <Button onClick={disconnectWhatsApp} variant="outline" size="sm">
                 Desconectar
+              </Button>
+              <Button asChild variant="default" size="sm">
+                <a href="/dashboard/whatsapp/test">
+                  <Send className="w-4 h-4 mr-2" />
+                  Testar Mensagens
+                </a>
               </Button>
             </div>
           </CardContent>
