@@ -31,6 +31,7 @@
     "@radix-ui/react-toast": "^1.1.5",
     "@stripe/stripe-js": "^2.0.0",
     "@tanstack/react-query": "^5.0.0",
+    "@whiskeysockets/baileys": "^7.0.0-rc.6",
     "class-variance-authority": "^0.7.0",
     "cloudinary": "^1.41.0",
     "clsx": "^2.0.0",
@@ -39,6 +40,8 @@
     "lucide-react": "^0.294.0",
     "next": "^14.0.0",
     "next-auth": "^5.0.0-beta.4",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
     "react": "^18.0.0",
     "react-datepicker": "^4.0.0",
     "react-dom": "^18.0.0",
@@ -47,6 +50,7 @@
     "sonner": "^1.0.0",
     "stripe": "^14.0.0",
     "tailwind-merge": "^2.0.0",
+    "whatsapp-web.js": "^1.34.1",
     "zod": "^3.22.0"
   },
   "devDependencies": {

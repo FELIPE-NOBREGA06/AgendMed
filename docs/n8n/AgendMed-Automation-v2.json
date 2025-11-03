@@ -1,0 +1,521 @@
+{
+  "name": "AgendMed - Assistente IA Médica",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a1eec119-4e22-4e62-b575-6ccb913de655",
+              "name": "telefone",
+              "value": "={{ $json.body.data.key.remoteJid.split('@')[0] }}",
+              "type": "string"
+            },
+            {
+              "id": "9e89621d-db16-476d-922a-9761d37db78a",
+              "name": "fromMe",
+              "value": "={{ $json.body.data.key.fromMe }}",
+              "type": "boolean"
+            },
+            {
+              "id": "6ce700dd-bac5-4e5a-a58d-f1182d048723",
+              "name": "isGroup",
+              "value": "={{ $json.body.data?.message?.senderKeyDistributionMessage?.groupId ? true : false }}",
+              "type": "boolean"
+            },
+            {
+              "id": "7a746db9-0b49-4679-9d7a-dbee5cf7c3ee",
+              "name": "nome",
+              "value": "={{ $json.body.data.pushName }}",
+              "type": "string"
+            },
+            {
+              "id": "0d7bf3c9-561c-445e-afbc-cd3d1a65d37a",
+              "name": "nomeinstancia_evo",
+              "value": "AgendMed",
+              "type": "string"
+            },
+            {
+              "id": "58512958-635c-4d26-a57b-b649c909e1a7",
+              "name": "host_evo",
+              "value": "https://evolution.devfraga.com",
+              "type": "string"
+            },
+            {
+              "id": "5378d2c4-6048-4069-a4e6-a36e760c2786",
+              "name": "apikey_evo",
+              "value": "={{ $json.body.apikey }}",
+              "type": "string"
+            },
+            {
+              "id": "ba41443e-9a7b-460c-aec0-683e0a043f87",
+              "name": "delay",
+              "value": "[1000, 2000, 700, 2500]",
+              "type": "array"
+            },
+            {
+              "id": "agendmed-api-url",
+              "name": "agendmed_api_url",
+              "value": "https://agend-med.vercel.app/api",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-2224, 80],
+      "id": "7f3c8348-2209-4462-8a24-0896fb5bc9bb",
+      "name": "global"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2bb556aa-953f-406e-b2d4-1f8dea4054b8",
+              "leftValue": "={{ $json.fromMe }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "444e6b4c-2ef1-48af-a439-0031ce12cb8e",
+              "leftValue": "={{ $json.isGroup }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-1984, 64],
+      "id": "1f2368bd-3e76-427c-b186-136354f39275",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('global').item.json.agendmed_api_url }}/patients/find-or-create",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.AGENDMED_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"phone\": \"{{ $('global').item.json.telefone }}\",\n  \"name\": \"{{ $('global').item.json.nome }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-1600, 128],
+      "id": "2409c7b8-e613-407f-b43a-6a677e191fc1",
+      "name": "Buscar/Criar Paciente AgendMed"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Webhook').item.json.body.data.messageType }}",
+                    "rightValue": "audioMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "e6b268ba-470d-405c-aa4f-500763b5260f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a999c4b1-e676-4261-9413-bb64841a9aa6",
+                    "leftValue": "={{ $('Webhook').item.json.body.data.messageType }}",
+                    "rightValue": "conversation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "texto"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8bb6db5b-1708-4d20-b72e-08c51269e7a1",
+                    "leftValue": "={{ $('Webhook').item.json.body.data.messageType }}",
+                    "rightValue": "imageMessage",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "image"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [-1200, 128],
+      "id": "e946cfd1-9639-4ed2-91d7-6b071ff4e955",
+      "name": "Tipo da Mensagem"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agendmed-webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-2464, 80],
+      "id": "208d18b6-e78c-4480-9c89-7334ea08d3a8",
+      "name": "Webhook",
+      "webhookId": "agendmed-webhook-id"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.texto }}",
+        "options": {
+          "systemMessage": "=<systemData>\n  Data de hoje: {{ $now.toFormat('dd/MM/yyyy HH:mm:ss', { timezone: 'America/Sao_Paulo'}) }}\n</systemData>\n\n# Dados do Paciente\nNome: \"{{ $('global').item.json.nome }}\"\nTelefone: \"{{ $('global').item.json.telefone }}\"\n\n# PAPEL\nVocê é a Ana, assistente virtual do AgendMed, uma plataforma inovadora de agendamento médico. Sua função é acolher pacientes pelo WhatsApp de forma humanizada, prestando informações sobre a plataforma, ajudando com agendamentos e suporte técnico.\n\n**IMPORTANTE:** Seja concisa! Máximo 2-3 linhas por mensagem, como um humano faria no WhatsApp.\n\n# INSTRUÇÕES\n\n## Etapa 1: Saudação e Apresentação\nEx: Oi! Sou a Ana do AgendMed 😊\n**Atenção:** Caso usuário apenas tenha mandado oi ou bom dia sem objetivo direto, responda: \"Como posso te ajudar?\"\n\n## Etapa 2: Identificação da Necessidade\n- Identifique se é paciente ou médico/clínica\n- Solicite o nome para personalizar o atendimento\n- Uma pergunta por vez\n\nEx:\n**Paciente:** Quero agendar uma consulta.\n**Ana:** Que ótimo! Qual seu nome?\n\n## Etapa 3: Direcionamento por Tipo de Usuário\n\n### Para Pacientes:\n- Explique como funciona o AgendMed\n- Ajude a encontrar médicos/clínicas\n- Auxilie no processo de agendamento\n- Esclareça dúvidas sobre consultas\n\n### Para Médicos/Clínicas:\n- Apresente os benefícios da plataforma\n- Explique o processo de cadastro\n- Informe sobre planos e funcionalidades\n- Direcione para demonstração\n\n## Etapa 4: Suporte Técnico\n- Ajude com problemas de login\n- Esclareça dúvidas sobre funcionalidades\n- Oriente sobre uso da plataforma\n- Colete feedback e sugestões\n\n# FERRAMENTAS\n\n## agendamentos\n**Quando usar:** Para verificar disponibilidade, criar, reagendar ou cancelar consultas.\n\n**Diretrizes de uso:**\n- **Consultas:** Sempre verificar disponibilidade antes de confirmar\n- **Confirmação:** Sempre confirmar dados antes de finalizar agendamento\n- **Horários:** Apresentar opções claras e organizadas\n- **Reagendamento:** Verificar política de cancelamento\n\n## medicos\n**Quando usar:** Para buscar médicos por especialidade, localização ou disponibilidade.\n\n## clinicas\n**Quando usar:** Para buscar clínicas por região, especialidades ou convênios aceitos.\n\n# CONTEXTO\n\nO AgendMed é uma plataforma completa de gestão médica que conecta pacientes, médicos e clínicas de forma inteligente. Nossa missão é simplificar o acesso à saúde através da tecnologia.\n\n## Funcionalidades Principais:\n\n### Para Pacientes:\n- Busca de médicos por especialidade e localização\n- Agendamento online 24/7\n- Histórico de consultas\n- Lembretes automáticos\n- Avaliações e comentários\n- Telemedicina integrada\n\n### Para Médicos:\n- Agenda digital inteligente\n- Gestão de pacientes\n- Prontuário eletrônico\n- Controle financeiro\n- Relatórios e analytics\n- Integração com convênios\n\n### Para Clínicas:\n- Gestão multi-profissional\n- Controle de salas e equipamentos\n- Faturamento automatizado\n- Dashboard executivo\n- Integração com laboratórios\n- Sistema de filas inteligente\n\n## Planos Disponíveis:\n\n### Plano Básico (Gratuito):\n- Até 50 agendamentos/mês\n- Agenda básica\n- Suporte por email\n\n### Plano Profissional (R$ 49,90/mês):\n- Agendamentos ilimitados\n- Prontuário eletrônico\n- Relatórios avançados\n- Suporte prioritário\n- Telemedicina\n\n### Plano Clínica (R$ 149,90/mês):\n- Múltiplos profissionais\n- Gestão financeira completa\n- Integração com convênios\n- Dashboard executivo\n- Suporte dedicado\n\n## Informações de Contato:\n- **Site:** https://agendmed.com.br\n- **Suporte:** suporte@agendmed.com.br\n- **WhatsApp:** (11) 99999-9999\n- **Horário de atendimento:** 8h às 18h (seg-sex)\n\n# REGRAS ESPECÍFICAS\n\n## O QUE VOCÊ DEVE FAZER:\n- Usar linguagem natural, coloquial e acolhedora\n- Ser transparente sobre funcionalidades e limitações\n- Sempre confirmar informações importantes\n- Direcionar para canais apropriados quando necessário\n- Coletar feedback para melhorias\n\n## O QUE VOCÊ NÃO DEVE FAZER:\n- Dar conselhos médicos\n- Prometer funcionalidades não disponíveis\n- Compartilhar dados pessoais de outros usuários\n- Fazer diagnósticos ou recomendações de tratamento\n- Agendar consultas sem confirmação do paciente\n\n## FLUXOS ESPECÍFICOS:\n\n### Novo Paciente:\n1. Apresentação da plataforma\n2. Explicação do processo de cadastro\n3. Ajuda na busca de médicos\n4. Orientação sobre primeiro agendamento\n\n### Paciente Existente:\n1. Identificação do problema/necessidade\n2. Acesso direto às funcionalidades\n3. Suporte técnico se necessário\n\n### Médico Interessado:\n1. Apresentação dos benefícios\n2. Demonstração das funcionalidades\n3. Informações sobre planos\n4. Agendamento de demonstração\n\n### Suporte Técnico:\n1. Identificação do problema\n2. Tentativa de resolução imediata\n3. Escalação para suporte técnico se necessário\n4. Follow-up da resolução\n\nLembre-se: Você é a primeira impressão do AgendMed. Seja sempre prestativa, profissional e humana!"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [400, 128],
+      "id": "ai-assistant-agendmed",
+      "name": "Assistente IA AgendMed",
+      "credentials": {
+        "openAiApi": {
+          "id": "openai-credentials-id",
+          "name": "OpenAI AgendMed"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('global').item.json.agendmed_api_url }}/appointments/check-availability",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.AGENDMED_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"date\": \"{{ $json.requested_date }}\",\n  \"doctorId\": \"{{ $json.doctor_id }}\",\n  \"clinicId\": \"{{ $json.clinic_id }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 200],
+      "id": "check-availability",
+      "name": "Verificar Disponibilidade"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('global').item.json.agendmed_api_url }}/appointments/create",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.AGENDMED_API_KEY }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"patientId\": \"{{ $('Buscar/Criar Paciente AgendMed').item.json.id }}\",\n  \"doctorId\": \"{{ $json.doctor_id }}\",\n  \"clinicId\": \"{{ $json.clinic_id }}\",\n  \"date\": \"{{ $json.appointment_date }}\",\n  \"time\": \"{{ $json.appointment_time }}\",\n  \"type\": \"{{ $json.appointment_type || 'consultation' }}\",\n  \"notes\": \"{{ $json.notes || '' }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 200],
+      "id": "create-appointment",
+      "name": "Criar Agendamento"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('global').item.json.host_evo }}/message/sendText/{{ $('global').item.json.nomeinstancia_evo }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "apikey",
+              "value": "={{ $('global').item.json.apikey_evo }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('global').item.json.telefone }}\",\n  \"text\": \"{{ $('Assistente IA AgendMed').item.json.content || $('Assistente IA AgendMed').item.json.text }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1600, 128],
+      "id": "send-whatsapp-response",
+      "name": "Enviar Resposta WhatsApp"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('global').item.json.agendmed_api_url }}/doctors/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "specialty",
+              "value": "={{ $json.specialty }}"
+            },
+            {
+              "name": "location",
+              "value": "={{ $json.location }}"
+            },
+            {
+              "name": "insurance",
+              "value": "={{ $json.insurance }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.AGENDMED_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 400],
+      "id": "search-doctors",
+      "name": "Buscar Médicos"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('global').item.json.agendmed_api_url }}/clinics/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "specialty",
+              "value": "={{ $json.specialty }}"
+            },
+            {
+              "name": "location",
+              "value": "={{ $json.location }}"
+            },
+            {
+              "name": "insurance",
+              "value": "={{ $json.insurance }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.AGENDMED_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [800, 600],
+      "id": "search-clinics",
+      "name": "Buscar Clínicas"
+    },
+    {
+      "parameters": {
+        "content": "### AgendMed - Automação WhatsApp\n\nFluxo principal:\n1. Recebe mensagem via webhook\n2. Identifica/cria paciente no AgendMed\n3. Processa mensagem (texto/áudio/imagem)\n4. Responde via IA contextualizada\n5. Executa ações (agendamentos, buscas)\n6. Envia resposta via WhatsApp",
+        "height": 400,
+        "width": 600,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-2600, -200],
+      "typeVersion": 1,
+      "id": "documentation-note",
+      "name": "Documentação"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "global",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "global": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Buscar/Criar Paciente AgendMed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar/Criar Paciente AgendMed": {
+      "main": [
+        [
+          {
+            "node": "Tipo da Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tipo da Mensagem": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Assistente IA AgendMed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Assistente IA AgendMed": {
+      "main": [
+        [
+          {
+            "node": "Enviar Resposta WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-11-02T12:00:00.000Z",
+      "updatedAt": "2024-11-02T12:00:00.000Z",
+      "id": "agendmed-automation",
+      "name": "AgendMed"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-11-02T12:00:00.000Z",
+  "versionId": "agendmed-v2"
+}

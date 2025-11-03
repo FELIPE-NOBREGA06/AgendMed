@@ -12,7 +12,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Button } from '@/components/ui/button';
-import { Banknote, CalendarCheck2, ChevronLeft, ChevronRight, Folder, List, Settings } from 'lucide-react';
+import { Banknote, CalendarCheck2, ChevronLeft, ChevronRight, Folder, List, Settings, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -87,6 +87,13 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
             />
 
             <SidebarLink
+              href="/dashboard/whatsapp"
+              label="WhatsApp Bot"
+              pathname={pathname}
+              isCollapsed={isCollapsed}
+              icon={<MessageSquare className='w-6 h-6' />}
+            />
+            <SidebarLink
               href="/dashboard/plans"
               label="Planos"
               pathname={pathname}
@@ -137,6 +144,14 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
                 pathname={pathname}
                 isCollapsed={isCollapsed}
                 icon={<Settings className='w-6 h-6' />}
+              />
+
+              <SidebarLink
+                href="/dashboard/whatsapp"
+                label="WhatsApp Bot"
+                pathname={pathname}
+                isCollapsed={isCollapsed}
+                icon={<MessageSquare className='w-6 h-6' />}
               />
 
               <SidebarLink
@@ -214,6 +229,14 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
                   pathname={pathname}
                   isCollapsed={isCollapsed}
                   icon={<Settings className='w-6 h-6' />}
+                />
+
+                <SidebarLink
+                  href="/dashboard/whatsapp"
+                  label="WhatsApp Bot"
+                  pathname={pathname}
+                  isCollapsed={isCollapsed}
+                  icon={<MessageSquare className='w-6 h-6' />}
                 />
 
                 <SidebarLink

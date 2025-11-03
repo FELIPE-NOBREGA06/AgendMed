@@ -1,290 +1,191 @@
+# 🏥 AgendMed - Sistema de Agendamento Médico
 
-# 🏥 AgendMed - Sistema de Agendamento para Clínicas
+Sistema completo de agendamento médico com integração WhatsApp, desenvolvido com Next.js, Prisma e PostgreSQL.
 
-> **Projeto Integrador II - Sistemas de Informação**  
-> Sistema web completo para gerenciamento de agendamentos médicos e odontológicos
+## 🚀 Funcionalidades
 
-![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)
-![Stripe](https://img.shields.io/badge/Stripe-626CD9?style=for-the-badge&logo=Stripe&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+### 📱 **WhatsApp Bot**
+- Agendamento automático via WhatsApp
+- QR Code gerado diretamente no dashboard
+- Lembretes automáticos para pacientes
+- Integração completa com banco de dados
 
-## 📋 Sobre o Projeto
+### 🏥 **Dashboard Médico**
+- Gestão de consultas e horários
+- Cadastro de médicos e serviços
+- Relatórios de agendamentos
+- Interface responsiva e moderna
 
-O **AgendMed** é uma plataforma web moderna desenvolvida para facilitar o agendamento de consultas médicas e odontológicas. O sistema conecta pacientes e profissionais de saúde através de uma interface intuitiva e funcionalidades robustas.
+### 🔧 **APIs RESTful**
+- Busca de médicos por especialidade
+- Verificação de disponibilidade
+- Criação de agendamentos
+- Autenticação segura
 
-### 🎯 Objetivos do Projeto Integrador
+## 🛠️ Tecnologias
 
-- Aplicar conhecimentos de desenvolvimento web full-stack
-- Implementar sistema de autenticação e autorização
-- Integrar gateway de pagamento (Stripe)
-- Desenvolver interface responsiva e acessível
-- Aplicar boas práticas de engenharia de software
-- Implementar arquitetura escalável e maintível
+- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, Prisma ORM
+- **Banco**: PostgreSQL (Neon)
+- **WhatsApp**: whatsapp-web.js
+- **Autenticação**: NextAuth.js
+- **Pagamentos**: Stripe
 
-## ✨ Funcionalidades Principais
+## ⚡ Instalação Rápida
 
-### 👥 Para Pacientes
-- 🔍 **Busca de Clínicas**: Encontre profissionais próximos
-- 📅 **Agendamento Online**: Marque consultas de forma prática
-- 📱 **Interface Responsiva**: Acesse de qualquer dispositivo
-- ⭐ **Avaliações**: Veja avaliações de outros pacientes
-
-### 🏥 Para Clínicas
-- 📊 **Dashboard Administrativo**: Gerencie sua clínica
-- 📋 **Gestão de Serviços**: Cadastre e organize seus serviços
-- 📅 **Controle de Agenda**: Visualize e gerencie agendamentos
-- 💰 **Sistema de Assinaturas**: Planos Basic e Professional
-- 👤 **Perfil Personalizado**: Configure informações da clínica
-
-### 💳 Sistema de Pagamentos
-- 💎 **Plano Basic**: R$ 27,90/mês - Até 3 serviços
-- 🚀 **Plano Professional**: R$ 97,90/mês - Até 50 serviços
-- 🔒 **Pagamentos Seguros**: Integração com Stripe
-- 📊 **Relatórios Financeiros**: Acompanhe suas receitas
-
-## 🛠️ Tecnologias Utilizadas
-
-### Frontend
-- **Next.js 14** - Framework React com App Router
-- **TypeScript** - Tipagem estática
-- **Tailwind CSS** - Framework CSS utilitário
-- **Radix UI** - Componentes acessíveis
-- **React Hook Form** - Gerenciamento de formulários
-- **Zod** - Validação de schemas
-
-### Backend
-- **Next.js API Routes** - API RESTful
-- **Prisma ORM** - Object-Relational Mapping
-- **PostgreSQL** - Banco de dados relacional
-- **NextAuth.js** - Autenticação OAuth
-
-### Integrações
-- **Stripe** - Gateway de pagamento
-- **Cloudinary** - Armazenamento de imagens
-- **Google OAuth** - Autenticação social
-- **GitHub OAuth** - Autenticação social
-
-### Ferramentas de Desenvolvimento
-- **ESLint** - Linting de código
-- **Prettier** - Formatação de código
-- **TypeScript** - Verificação de tipos
-
-## 🚀 Como Executar o Projeto
-
-### Pré-requisitos
-- Node.js 18+ 
-- npm ou yarn
-- PostgreSQL
-- Conta no Stripe (para pagamentos)
-- Contas OAuth (Google/GitHub)
-
-### 1. Clone o Repositório
 ```bash
-git clone https://github.com/seu-usuario/agendmed.git
+# Clone o repositório
+git clone <repository-url>
 cd agendmed
-```
 
-### 2. Instale as Dependências
-```bash
+# Instale as dependências
 npm install
+
+# Configure as variáveis de ambiente
+cp .env.example .env
+# Edite o .env com suas configurações
+
+# Execute as migrações do banco
+npx prisma migrate dev
+
+# Inicie o servidor de desenvolvimento
+npm run dev
 ```
 
-### 3. Configure as Variáveis de Ambiente
-Copie o arquivo `.example.env` para `.env` e configure:
+## 📱 WhatsApp Bot
 
+### Iniciar o Bot
+```bash
+node whatsapp-free/headless-bot.js
+```
+
+### Conectar WhatsApp
+1. Acesse: `http://localhost:3000/dashboard/whatsapp`
+2. Clique em "Gerar QR Code"
+3. Escaneie com seu WhatsApp
+4. Bot estará ativo para agendamentos
+
+### Comandos do Bot
+- `"oi"` - Iniciar conversa
+- `"agendar"` - Marcar consulta
+- `"consultas"` - Ver agendamentos
+- `"médicos"` - Ver especialidades
+- `"ajuda"` - Ver comandos
+
+## 🔧 Configuração
+
+### Variáveis de Ambiente (.env)
 ```env
-# Database
-DATABASE_URL="postgresql://usuario:senha@localhost:5432/agendmed"
+# Banco de Dados
+DATABASE_URL="postgresql://..."
 
-# NextAuth
-AUTH_SECRET="seu-auth-secret"
-AUTH_GOOGLE_ID="seu-google-client-id"
-AUTH_GOOGLE_SECRET="seu-google-client-secret"
-AUTH_GITHUB_ID="seu-github-client-id"
-AUTH_GITHUB_SECRET="seu-github-client-secret"
+# Autenticação
+NEXTAUTH_SECRET="..."
+NEXTAUTH_URL="http://localhost:3000"
+
+# GitHub OAuth
+AUTH_GITHUB_ID="..."
+AUTH_GITHUB_SECRET="..."
+
+# Google OAuth (opcional)
+AUTH_GOOGLE_ID="..."
+AUTH_GOOGLE_SECRET="..."
 
 # Stripe
-NEXT_PUBLIC_STRIPE_PUBLIC_KEY="pk_test_..."
 STRIPE_SECRET_KEY="sk_test_..."
-STRIPE_SECRET_WEBHOOK_KEY="whsec_..."
-STRIPE_PLAN_BASIC="price_..."
-STRIPE_PLAN_PROFISSIONAL="price_..."
+NEXT_PUBLIC_STRIPE_PUBLIC_KEY="pk_test_..."
 
-# URLs
-NEXT_PUBLIC_URL="http://localhost:3000"
-STRIPE_SUCCESS_URL="http://localhost:3000/dashboard/plans"
-STRIPE_CANCEL_URL="http://localhost:3000/dashboard/plans"
+# API Key para WhatsApp
+AGENDMED_API_KEY="agendmed_..."
 ```
-
-### 4. Configure o Banco de Dados
-```bash
-# Gerar cliente Prisma
-npm run db:generate
-
-# Aplicar schema (desenvolvimento)
-npm run db:push
-
-# OU resetar banco se houver conflitos
-npm run db:reset
-```
-
-### 5. Configure o Stripe
-```bash
-# Criar produtos automaticamente
-npm run stripe:setup
-
-# Para desenvolvimento local (webhook)
-npm run stripe:listen
-```
-
-### 6. Execute o Projeto
-```bash
-# Desenvolvimento
-npm run dev
-
-# Produção
-npm run build
-npm start
-```
-
-O projeto estará disponível em `http://localhost:3000`
 
 ## 📁 Estrutura do Projeto
 
 ```
-agendmed/
 ├── src/
 │   ├── app/                    # App Router (Next.js 14)
-│   │   ├── (public)/          # Páginas públicas
-│   │   ├── (panel)/           # Dashboard administrativo
-│   │   └── api/               # API Routes
-│   ├── components/            # Componentes reutilizáveis
-│   │   └── ui/               # Componentes de interface
-│   ├── lib/                  # Configurações e utilitários
-│   ├── utils/                # Funções auxiliares
-│   └── types/                # Definições de tipos
-├── prisma/                   # Schema e migrações
-├── public/                   # Arquivos estáticos
-├── scripts/                  # Scripts de automação
-└── docs/                     # Documentação
+│   │   ├── (panel)/           # Dashboard protegido
+│   │   ├── api/               # API Routes
+│   │   └── auth/              # Autenticação
+│   ├── components/            # Componentes React
+│   ├── lib/                   # Utilitários e configurações
+│   └── types/                 # Tipos TypeScript
+├── whatsapp-free/             # Bots WhatsApp
+│   ├── headless-bot.js        # Bot principal (produção)
+│   ├── qr-only-bot.js         # Bot apenas QR Code
+│   └── simple-agendamento-bot.js # Bot simplificado
+├── scripts/                   # Scripts utilitários
+│   ├── dev-tools/             # Ferramentas de desenvolvimento
+│   ├── create-test-doctor.js  # Criar médicos de teste
+│   └── seed-test-data.js      # Popular banco com dados
+├── docs/                      # Documentação
+└── prisma/                    # Schema e migrações
 ```
 
-## 🔧 Scripts Disponíveis
+## 🎯 Scripts Disponíveis
 
 ```bash
 # Desenvolvimento
-npm run dev              # Inicia servidor de desenvolvimento
+npm run dev              # Servidor de desenvolvimento
 npm run build           # Build para produção
-npm run start           # Inicia servidor de produção
+npm run start           # Servidor de produção
 
 # Banco de Dados
-npm run db:generate     # Gera cliente Prisma
-npm run db:push         # Aplica mudanças no schema
-npm run db:migrate      # Executa migrações
-npm run db:studio       # Interface visual do banco
+npx prisma migrate dev   # Executar migrações
+npx prisma studio       # Interface visual do banco
+npx prisma generate     # Gerar cliente Prisma
 
-# Stripe
-npm run stripe:setup    # Configura produtos no Stripe
-npm run stripe:listen   # Escuta webhooks localmente
+# WhatsApp Bot
+node whatsapp-free/headless-bot.js    # Bot completo
+node whatsapp-free/qr-only-bot.js     # Apenas QR Code
 
 # Utilitários
-npm run activate:pro    # Ativa plano Professional (dev)
-npm run create:clinics  # Cria clínicas de teste
+node scripts/create-test-doctor.js    # Criar médicos de teste
+node scripts/seed-test-data.js        # Popular banco
 ```
 
-## 🎨 Design System
+## 🔒 Segurança
 
-O projeto utiliza um design system consistente baseado em:
+- Autenticação obrigatória para dashboard
+- API Keys para integração WhatsApp
+- Validação de dados em todas as APIs
+- Sanitização de inputs do usuário
 
-- **Cores Primárias**: Verde esmeralda (#10B981)
-- **Tipografia**: Inter (texto) + JetBrains Mono (código)
-- **Componentes**: Radix UI + Tailwind CSS
-- **Ícones**: Lucide React
-- **Responsividade**: Mobile-first approach
+## 📊 Monitoramento
 
-## 🔐 Segurança
+- Logs detalhados do WhatsApp Bot
+- Status de conexão em tempo real
+- Relatórios de agendamentos
+- Métricas de uso do sistema
 
-- ✅ Autenticação OAuth segura
-- ✅ Validação de dados com Zod
-- ✅ Sanitização de inputs
-- ✅ HTTPS obrigatório em produção
-- ✅ Webhooks assinados (Stripe)
-- ✅ Variáveis de ambiente protegidas
+## 🚀 Deploy
 
-## 📊 Arquitetura
-
-```mermaid
-graph TB
-    A[Cliente Web] --> B[Next.js Frontend]
-    B --> C[Next.js API Routes]
-    C --> D[Prisma ORM]
-    D --> E[PostgreSQL]
-    C --> F[Stripe API]
-    C --> G[OAuth Providers]
-    B --> H[Cloudinary]
-```
-
-## 🧪 Testes
-
+### Vercel (Recomendado)
 ```bash
-# Executar testes
-npm test
-
-# Testes com cobertura
-npm run test:coverage
-
-# Testes E2E
-npm run test:e2e
+# Conecte seu repositório ao Vercel
+# Configure as variáveis de ambiente
+# Deploy automático a cada push
 ```
 
-## 🚨 Troubleshooting
-
-### Erro de Migração no Deploy
-Se encontrar erro "type Plan already exists":
-
+### Docker
 ```bash
-# Opção 1: Resetar banco (desenvolvimento)
-npm run db:reset
+# Build da imagem
+docker build -t agendmed .
 
-# Opção 2: Usar db:push em vez de migrate
-npm run build  # Já configurado para usar db:push
+# Executar container
+docker run -p 3000:3000 agendmed
 ```
 
-### Problemas com Variáveis de Ambiente
-1. Verifique se todas as variáveis estão configuradas
-2. Use o componente de debug em `/dashboard/plans`
-3. Confirme se o `.env` não está no Git
+## 📞 Suporte
 
-### Erro no Stripe
-1. Verifique as chaves públicas e secretas
-2. Configure os webhooks corretamente
-3. Use `npm run stripe:setup` para criar produtos
-
-## 📈 Roadmap
-
-### Versão 2.0
-- [ ] Sistema de notificações
-- [ ] Chat em tempo real
-- [ ] Aplicativo mobile (React Native)
-- [ ] Integração com calendários externos
-- [ ] Sistema de avaliações
-- [ ] Relatórios avançados
-
-### Versão 2.1
-- [ ] Telemedicina
-- [ ] Prescrições digitais
-- [ ] Integração com laboratórios
-- [ ] Dashboard analytics
-
-## 👥 Equipe de Desenvolvimento
-
-- **Desenvolvedor Full-Stack**: [Seu Nome]
-- **Orientador**: [Nome do Professor]
-- **Instituição**: [Nome da Faculdade]
+- **Documentação**: `/docs`
+- **Issues**: GitHub Issues
+- **Email**: suporte@agendmed.com
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+MIT License - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
+---
+
+**AgendMed** - Simplificando o agendamento médico com tecnologia moderna 🏥✨

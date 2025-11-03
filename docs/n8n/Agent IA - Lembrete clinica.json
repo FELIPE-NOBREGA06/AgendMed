@@ -1,0 +1,535 @@
+{
+  "name": "Agent IA - Lembrete clinica",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8,
+              "triggerAtMinute": 40
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -288,
+        -16
+      ],
+      "id": "8f43e3e2-4322-4fdd-906e-b9c2897f6f3a",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a93f322f-24a5-4f47-ba96-ce24d9eaf957",
+              "name": "nomeinstancia_evo",
+              "value": "Clinica",
+              "type": "string"
+            },
+            {
+              "id": "686a8819-6e32-4d77-b12e-edb07f395f45",
+              "name": "host_evo",
+              "value": "https://evolution.devfraga.com",
+              "type": "string"
+            },
+            {
+              "id": "ae9f6a21-aba1-4629-bc97-560a4a14ff23",
+              "name": "apikey_evo",
+              "value": "AA2A9B56B13C-4175-958E-0131FBA40DAD",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        -16
+      ],
+      "id": "1e8b3254-06bf-4b23-9c0d-8ded1a9f0a3e",
+      "name": "dados"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "appointments",
+        "returnAll": true,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "start_time",
+              "condition": "gte",
+              "keyValue": "={{ $json.nextDayStart }}"
+            },
+            {
+              "keyName": "end_time",
+              "condition": "lt",
+              "keyValue": "={{ $json.nextDayEnd }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        544,
+        -16
+      ],
+      "id": "525a890a-4ed1-4709-be72-48a7d64a636d",
+      "name": "Busca agendamentos",
+      "credentials": {
+        "supabaseApi": {
+          "id": "DCSV6UDAZ1anMymm",
+          "name": "Supabase (agenda clinica)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Defina aqui o fuso da clínica em horas\nconst clinicOffset = -3; // Brasília (GMT-3)\n\n// Função para formatar datas no padrão SQL (YYYY-MM-DD HH:mm:ss)\nfunction formatDateLocal(date) {\n  const pad = (n) => (n < 10 ? '0' + n : n);\n  return date.getFullYear() + '-' +\n         pad(date.getMonth() + 1) + '-' +\n         pad(date.getDate()) + ' ' +\n         pad(date.getHours()) + ':' +\n         pad(date.getMinutes()) + ':' +\n         pad(date.getSeconds());\n}\n\n// Data atual em UTC\nconst nowUTC = new Date();\n\n// Calcula \"amanhã\" em UTC\nconst tomorrowUTC = new Date(nowUTC);\ntomorrowUTC.setUTCDate(nowUTC.getUTCDate() + 1);\n\n// Ajusta para o fuso da clínica\nconst startLocal = new Date(tomorrowUTC);\nstartLocal.setUTCHours(0 - clinicOffset, 0, 0, 0);\n\nconst endLocal = new Date(tomorrowUTC);\nendLocal.setUTCHours(23 - clinicOffset, 59, 59, 999);\n\nreturn [{\n  nextDayStart: formatDateLocal(startLocal), // 2025-09-30 00:00:00\n  nextDayEnd: formatDateLocal(endLocal),     // 2025-09-30 23:59:59\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        -16
+      ],
+      "id": "b9014ab4-1dc7-499c-97b6-5ba7397d5aac",
+      "name": "Gerar datas amanha"
+    },
+    {
+      "parameters": {
+        "jsCode": "let tz = 'America/Sao_Paulo';\nlet start = new Date($json.start_time);\n\nlet hora = new Intl.DateTimeFormat('pt-BR', {\n  timeZone: tz, hour: '2-digit', minute: '2-digit', hour12: false\n}).format(start)\n\nreturn [{...$json, hora}]"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        752,
+        -16
+      ],
+      "id": "ecb6f6e6-c1bf-4f5c-9391-c3c49799900b",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1024,
+        288
+      ],
+      "id": "f2ba1709-6493-4a49-a362-a3fec9560d4c",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "tSRKl446lHopApOz",
+          "name": "Projetos Canal"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.customer_phone }}",
+        "contextWindowLength": 4
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1232,
+        240
+      ],
+      "id": "809ae9cf-8573-436f-8616-3813de8c4c99",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Dados do agendamento:\n{{ JSON.stringify($json, null, 2) }}",
+        "options": {
+          "systemMessage": "=<systemData>\n  Data de hoje: {{ $now.weekdayLong }}, {{ $now.format('dd/MM/yyyy') }}, {{ $now.hour.toString().padStart(2, '0') }}:{{ $now.minute.toString().padStart(2, '0') }}\n</systemData>\n\n# Dados usuário\n[customer_name] Nome do cliente: \"{{ $json.customer_name }}\"\n[customer_phone] Telefone do cliente: \"{{ $json.customer_phone }}\"\n\n# PAPEL\nVocê é o **Agente de Lembrete da Clínica**. Sua única função é **gerar uma mensagem curta e humanizada** para WhatsApp, lembrando o paciente sobre o agendamento do dia/horário informado.\n\n# ENTRADA (sempre recebida)\nUm objeto JSON com os dados do agendamento:\n{\n  \"id\": <int>,\n  \"created_at\": \"<ISO8601>\",\n  \"service_code\": <int>,          // id do serviço\n  \"professional_code\": <int>,     // id do profissional\n  \"customer_name\": \"<string>\",\n  \"customer_phone\": \"<string>\",\n  \"start_time\": \"<ISO8601 UTC>\", // timestampz\n  \"end_time\": \"<ISO8601 UTC>\" // timestampz\n}\n\n- Timezone da clinca: -3 // Brasilia.\n\n# FERRAMENTA (tool)\n- Use o `service_code` recebido que é o (id em int) do serviço para usar na busca e encontrar qual é o serviço desse agendamento.\n- Use o `professional_code` recebido que é o (id em int) do professional para usar na busca e encontrar qual é o professional desse agendamento.\n\n# REGRAS DE ESTILO\n- Soe **humano, atencioso e natural**, sem parecer IA.\n- Máximo **1–2 linhas**. Sem formalidade excessiva, sem jargões técnicos.\n- Use **nome curto** do paciente (primeiro nome, capitalizado).\n- Informe **dia** (preferir “amanhã” se for no dia seguinte, senão o **dia da semana**) e **hora** em **HH:mm** no **fuso da clínica**.\n- Cite o **profissional pelo nome**. Se não conseguir obtê-lo, use “nosso(a) profissional da clínica”.\n- Opcionalmente feche com uma frase acolhedora, ex.: “Aguardamos você.” ou “Se precisar, é só responder.”\n- **Não** inclua links, anexos, JSON, nem informações internas.\n\n# RESOLUÇÃO DE DADOS\n1. **Fuso horário**  \n   - Converter `start_time` (UTC) para o horário local usando `clinic_timezone`; se não houver, usar `clinic_offset_hours`; se nenhum existir, assumir \"America/Sao_Paulo\".\n2. **Dia**  \n   - Se a data convertida for **amanhã**, usar “amanhã”; caso contrário, usar o **dia da semana** (Segunda, Terça, …).\n3. **Profissional**  \n   - Se a ferramenta/variáveis fornecerem `professional_name` pelo `professional_code`, use-o (ex.: “Dr. Leonardo”, “Dra. Ana Caroline”).  \n   - Se o gênero/título for desconhecido, usar “Dr.” por padrão; se totalmente indisponível, usar “nosso(a) profissional da clínica”.\n4. **Serviço (opcional)**  \n   - Se houver `service_name`, pode incluir discretamente (“consulta de Limpeza”). Caso contrário, omita.\n\n# SAÍDA\n- **Apenas texto** da mensagem pronta para WhatsApp (PT-BR), em 1–2 linhas.\n\n# EXEMPLOS DE TOM E FORMATAÇÃO\n- “Olá Fulano, só passando para lembrar que **amanhã** às **16:30** você tem consulta com **Dr. Leonardo**. Aguardamos você.”\n- “Oi Maria, lembrando seu horário **Terça às 15:00** com **Dra. Ana Caroline**. Qualquer coisa é só responder.”\n\n# PASSOS (resumo)\n1) Converter `start_time` para horário local; extrair dia (“amanhã” ou dia da semana) e hora HH:mm.  \n2) Resolver `professional_name` a partir de `professional_code` (quando disponível).  \n3) Montar mensagem curta, humana e acolhedora; usar primeiro nome do paciente.  \n4) SEMPRE Retornar **apenas** a mensagem final."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1216,
+        -64
+      ],
+      "id": "af481f88-9244-4d74-9c9f-44b93f8c8b79",
+      "name": "Agent_Lembrete"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Ferramenta (tool) para buscar os services (serviços)",
+        "operation": "getAll",
+        "tableId": "services",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        320
+      ],
+      "id": "aa268248-2b70-435d-bb03-6e7cc561bae9",
+      "name": "services",
+      "credentials": {
+        "supabaseApi": {
+          "id": "DCSV6UDAZ1anMymm",
+          "name": "Supabase (agenda clinica)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Ferramenta (tool) para buscar os professionals (profissional)",
+        "operation": "getAll",
+        "tableId": "professionals",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        368
+      ],
+      "id": "5f1bdeb9-be0a-48ca-a435-a3bb1b571060",
+      "name": "professionals",
+      "credentials": {
+        "supabaseApi": {
+          "id": "DCSV6UDAZ1anMymm",
+          "name": "Supabase (agenda clinica)"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1840,
+        -32
+      ],
+      "id": "e8565468-9eb5-4f73-bfe3-c48c69686d62",
+      "name": "Wait",
+      "webhookId": "4dc22c1b-c404-4172-919a-a9d348da378d"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('dados').item.json.host_evo }}/message/sendText/{{ $('dados').item.json.nomeinstancia_evo }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "apikey",
+              "value": "={{ $('dados').item.json.apikey_evo }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Busca agendamentos').item.json.customer_phone }}\",\n  \"text\": \"{{ $json.output }}\",\n  \"delay\": 600\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2240,
+        16
+      ],
+      "id": "153e181b-d05a-4c5d-a9fb-26f4bdb88867",
+      "name": "Enviar lembrete",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "sendTo": "sujeitoaulas@gmail.com",
+        "subject": "Falha ao enviar mensagem de lembrete clinica",
+        "message": "=Falha ao enviar mensagem de lembrete clinica \n- {{ $now }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2416,
+        320
+      ],
+      "id": "b7a142c2-4061-4e6d-ad1b-3373b3a89851",
+      "name": "Send a message",
+      "webhookId": "b7da0ddb-aadf-4bdb-869c-9619ff1765e3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "dRBNWRstwGcW8BaY",
+          "name": "Gmail (grouply)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Normalizar e gerar a data\n",
+        "height": 496,
+        "width": 800
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -384,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "429fd005-e040-47bf-9e30-5374317c7bb5",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Buscar os agendamentos (appointments)",
+        "height": 496,
+        "width": 480,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        432,
+        -208
+      ],
+      "id": "bfc87c5f-fc1e-4072-82cb-f5703a199c5c",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## AGENT - Para criar a mensagem de lembrete",
+        "height": 800,
+        "width": 816,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        928,
+        -208
+      ],
+      "id": "e7d23f5b-04b1-4f91-a158-9e668841bc3a",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Envia a mensagem de lembrete\n",
+        "height": 432,
+        "width": 736,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        -192
+      ],
+      "id": "a7433ae2-45fd-4796-aee0-b452eed5685c",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Envia email de fallback error",
+        "height": 272,
+        "width": 400,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2208,
+        256
+      ],
+      "id": "fde5ba5c-8737-41b6-b686-245f5e28315c",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dados": {
+      "main": [
+        [
+          {
+            "node": "Gerar datas amanha",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gerar datas amanha": {
+      "main": [
+        [
+          {
+            "node": "Busca agendamentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Busca agendamentos": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Agent_Lembrete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agent_Lembrete",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agent_Lembrete",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "services": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agent_Lembrete",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "professionals": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agent_Lembrete",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agent_Lembrete": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Enviar lembrete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar lembrete": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f2f59e40-f003-43fc-86e1-19fff8d016a3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "33738330930e3881dd5571eca013f36ddf8aab20e4ea5c1f2ebaf4a2b4668ac6"
+  },
+  "id": "OECWtlJbisHbhegG",
+  "tags": [
+    {
+      "createdAt": "2025-10-09T20:20:44.529Z",
+      "updatedAt": "2025-10-09T20:20:44.529Z",
+      "id": "F08NxN7T2YZRXl7E",
+      "name": "clinica"
+    },
+    {
+      "createdAt": "2025-08-12T12:27:39.416Z",
+      "updatedAt": "2025-08-12T12:27:39.416Z",
+      "id": "D3nKbeKsFqL5p0Nt",
+      "name": "Curso"
+    }
+  ]
+}

@@ -1,0 +1,429 @@
+{
+  "name": "AgendMed - WhatsApp Bot Completo",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "whatsapp-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-whatsapp",
+      "name": "Webhook WhatsApp",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "filter-messages",
+              "leftValue": "={{ $json.body.data.key.fromMe }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-incoming",
+      "name": "Filtrar Mensagens Recebidas",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "extract-phone",
+              "name": "phone",
+              "value": "={{ $json.body.data.key.remoteJid.replace('@s.whatsapp.net', '') }}",
+              "type": "string"
+            },
+            {
+              "id": "extract-message",
+              "name": "message",
+              "value": "={{ $json.body.data.message.conversation || $json.body.data.message.extendedTextMessage?.text || 'Mensagem não suportada' }}",
+              "type": "string"
+            },
+            {
+              "id": "extract-name",
+              "name": "userName",
+              "value": "={{ $json.body.data.pushName || 'Usuário' }}",
+              "type": "string"
+            },
+            {
+              "id": "config-agendmed",
+              "name": "agendmed_api_url",
+              "value": "http://localhost:3000",
+              "type": "string"
+            },
+            {
+              "id": "config-api-key",
+              "name": "agendmed_api_key",
+              "value": "agendmed_8a6355c111a5349c0e84767c3c283d37bb6e976afcc6d65493fd45388b97aa55",
+              "type": "string"
+            },
+            {
+              "id": "config-evolution",
+              "name": "evolution_api_url",
+              "value": "https://sua-evolution-api.com",
+              "type": "string"
+            },
+            {
+              "id": "config-evolution-key",
+              "name": "evolution_api_key",
+              "value": "SUA_EVOLUTION_API_KEY",
+              "type": "string"
+            },
+            {
+              "id": "config-instance",
+              "name": "evolution_instance",
+              "value": "agendmed-bot",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "extract-data",
+      "name": "Extrair Dados da Mensagem",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Extrair Dados da Mensagem').item.json.agendmed_api_url }}/api/patients/find-or-create",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $('Extrair Dados da Mensagem').item.json.agendmed_api_key }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "phone",
+              "value": "={{ $('Extrair Dados da Mensagem').item.json.phone }}"
+            },
+            {
+              "name": "name",
+              "value": "={{ $('Extrair Dados da Mensagem').item.json.userName }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "find-patient",
+      "name": "Buscar/Criar Paciente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-3.5-turbo",
+        "messages": {
+          "messageValues": [
+            {
+              "role": "system",
+              "content": "Você é a assistente virtual da AgendMed, uma plataforma de agendamento médico via WhatsApp.\n\nINFORMAÇÕES DO USUÁRIO:\n- Nome: {{ $('Extrair Dados da Mensagem').item.json.userName }}\n- Telefone: {{ $('Extrair Dados da Mensagem').item.json.phone }}\n- ID Paciente: {{ $('Buscar/Criar Paciente').item.json.patient.id }}\n\nFUNCIONALIDADES DISPONÍVEIS:\n1. 🔍 Buscar médicos por especialidade\n2. 📅 Verificar disponibilidade de horários\n3. 🗓️ Agendar consultas médicas\n4. ❌ Cancelar agendamentos\n5. ℹ️ Informações sobre a plataforma\n\nINSTRUÇÕES:\n- Seja sempre amigável, profissional e empática\n- Use emojis para tornar a conversa mais agradável\n- Pergunte especialidade médica desejada\n- Pergunte data e horário preferidos\n- Confirme todos os dados antes de agendar\n- Se não entender algo, peça esclarecimento educadamente\n- Mantenha respostas concisas mas informativas\n\nFLUXO DE AGENDAMENTO:\n1. Usuário solicita agendamento\n2. Pergunte a especialidade médica\n3. Pergunte data preferida\n4. Mostre médicos disponíveis\n5. Mostre horários disponíveis\n6. Confirme dados do agendamento\n7. Finalize o agendamento\n\nEXEMPLOS DE RESPOSTAS:\n- \"Olá! 👋 Sou a assistente da AgendMed. Como posso ajudar você hoje?\"\n- \"Qual especialidade médica você precisa? 🏥\"\n- \"Para qual data você gostaria de agendar? 📅\"\n- \"Encontrei estes médicos disponíveis: ...\"\n- \"Horários disponíveis: ⏰ 09:00, 10:00, 14:00...\"\n\nSe o usuário quiser agendar, identifique:\n- ESPECIALIDADE: [especialidade mencionada]\n- DATA: [data mencionada ou 'não informada']\n- AÇÃO: BUSCAR_MEDICOS ou VERIFICAR_DISPONIBILIDADE ou AGENDAR\n\nResponda sempre em português brasileiro e seja prestativa!"
+            },
+            {
+              "role": "user",
+              "content": "={{ $('Extrair Dados da Mensagem').item.json.message }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 500
+        }
+      },
+      "id": "openai-assistant",
+      "name": "Assistente IA OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.3,
+      "position": [1120, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "openai-agendmed",
+          "name": "OpenAI AgendMed"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false
+          },
+          "conditions": [
+            {
+              "id": "check-buscar-medicos",
+              "leftValue": "={{ $('Assistente IA OpenAI').item.json.choices[0].message.content }}",
+              "rightValue": "BUSCAR_MEDICOS",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ]
+        }
+      },
+      "id": "check-action",
+      "name": "Verificar Ação Necessária",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Extrair Dados da Mensagem').item.json.agendmed_api_url }}/api/doctors/search",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $('Extrair Dados da Mensagem').item.json.agendmed_api_key }}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "specialty",
+              "value": "cardiologia"
+            },
+            {
+              "name": "limit",
+              "value": "3"
+            }
+          ]
+        }
+      },
+      "id": "search-doctors",
+      "name": "Buscar Médicos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Extrair Dados da Mensagem').item.json.agendmed_api_url }}/api/appointments/check-availability",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $('Extrair Dados da Mensagem').item.json.agendmed_api_key }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "date",
+              "value": "={{ new Date(Date.now() + 24*60*60*1000).toISOString().split('T')[0] }}"
+            },
+            {
+              "name": "doctorId",
+              "value": "={{ $('Buscar Médicos').item.json.doctors[0].id }}"
+            }
+          ]
+        }
+      },
+      "id": "check-availability",
+      "name": "Verificar Disponibilidade",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1780, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Extrair Dados da Mensagem').item.json.evolution_api_url }}/message/sendText/{{ $('Extrair Dados da Mensagem').item.json.evolution_instance }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Extrair Dados da Mensagem').item.json.evolution_api_key }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "number",
+              "value": "={{ $('Extrair Dados da Mensagem').item.json.phone }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $('Assistente IA OpenAI').item.json.choices[0].message.content }}"
+            }
+          ]
+        }
+      },
+      "id": "send-whatsapp",
+      "name": "Enviar Resposta WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Mensagem processada\" } }}"
+      },
+      "id": "webhook-response",
+      "name": "Resposta Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1780, 400]
+    }
+  ],
+  "connections": {
+    "Webhook WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Mensagens Recebidas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Mensagens Recebidas": {
+      "main": [
+        [
+          {
+            "node": "Extrair Dados da Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extrair Dados da Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Buscar/Criar Paciente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar/Criar Paciente": {
+      "main": [
+        [
+          {
+            "node": "Assistente IA OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assistente IA OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Verificar Ação Necessária",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Ação Necessária": {
+      "main": [
+        [
+          {
+            "node": "Buscar Médicos",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enviar Resposta WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar Médicos": {
+      "main": [
+        [
+          {
+            "node": "Verificar Disponibilidade",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar Disponibilidade": {
+      "main": [
+        [
+          {
+            "node": "Enviar Resposta WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar Resposta WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Resposta Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2024-11-02T12:00:00.000Z",
+  "versionId": "1"
+}
