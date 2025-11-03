@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
 import { spawn } from 'child_process'
-import fs from 'fs'
 import path from 'path'
+import { getWhatsAppStatus, clearWhatsAppStatus } from '@/lib/whatsapp-utils'
 
 let botProcess: any = null
 
@@ -20,7 +19,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Limpar status anterior
-    clearStatus()
+    clearWhatsAppStatus()
 
     // Iniciar bot apenas para QR Code
     console.log('🚀 Iniciando bot WhatsApp QR Code...')
@@ -77,51 +76,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function clearStatus() {
-  try {
-    const statusPath = path.join(process.cwd(), 'whatsapp-dashboard-status.json')
-    const initialStatus = {
-      connected: false,
-      qrCode: null,
-      phone: null,
-      lastSeen: null,
-      botType: 'webjs-headless',
-      mode: 'headless'
-    }
-    fs.writeFileSync(statusPath, JSON.stringify(initialStatus, null, 2))
-  } catch (error) {
-    console.error('Erro ao limpar status:', error)
-  }
-}
-
-// Função para obter status atual
-export function getWhatsAppStatus() {
-  try {
-    const statusPath = path.join(process.cwd(), 'whatsapp-dashboard-status.json')
-    if (fs.existsSync(statusPath)) {
-      const data = fs.readFileSync(statusPath, 'utf8')
-      return JSON.parse(data)
-    }
-  } catch (error) {
-    console.error('Erro ao ler status:', error)
-  }
-  
-  return {
-    connected: false,
-    qrCode: null,
-    phone: null,
-    lastSeen: null,
-    botType: 'webjs-headless',
-    mode: 'headless'
-  }
-}
-
 // Função para parar bot
-export function stopBot() {
+function stopBot() {
   if (botProcess) {
     botProcess.kill()
     botProcess = null
-    clearStatus()
+    clearWhatsAppStatus()
     console.log('Bot parado')
   }
 }

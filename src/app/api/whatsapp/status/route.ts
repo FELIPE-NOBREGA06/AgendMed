@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
-import { getWhatsAppStatus } from '../connect/route'
+import { getWhatsAppStatus } from '@/lib/whatsapp-utils'
 
 export async function GET(request: NextRequest) {
   try {
