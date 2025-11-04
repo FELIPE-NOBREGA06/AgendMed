@@ -3,7 +3,7 @@ Projeto Extencionista Integrador II
 
 # 🏥 AgendMed - Sistema de Agendamento Médico
 
-Sistema completo de agendamento médico com integração WhatsApp, desenvolvido com Next.js, Prisma e PostgreSQL.
+Sistema completo de agendamento médico com integração WhatsApp, desenvolvido com Next.js, React, Prisma 
 
 ## 🚀 Funcionalidades
 
@@ -169,22 +169,6 @@ node scripts/seed-test-data.js        # Popular banco
 # Configure as variáveis de ambiente
 # Deploy automático a cada push
 ```
-
-### Docker
-```bash
-# Build da imagem
-docker build -t agendmed .
-
-# Executar container
-docker run -p 3000:3000 agendmed
-```
-
-## 📞 Suporte
-
-- **Documentação**: `/docs`
-- **Issues**: GitHub Issues
-- **Email**: suporte@agendmed.com
-
 ## 📄 Licença
 
 MIT License - veja o arquivo [LICENSE](LICENSE) para detalhes.
