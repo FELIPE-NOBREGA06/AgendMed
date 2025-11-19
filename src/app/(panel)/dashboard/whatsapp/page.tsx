@@ -17,18 +17,39 @@ interface WhatsAppStatus {
 export default function WhatsAppPage() {
   const [status, setStatus] = useState<WhatsAppStatus>({ connected: false })
   const [loading, setLoading] = useState(false)
+  const [qrTimer, setQrTimer] = useState(0)
+  const [checkingConnection, setCheckingConnection] = useState(false)
 
   useEffect(() => {
     checkWhatsAppStatus()
     
     const interval = setInterval(() => {
-      if (status.qrCode || loading) {
+      if (status.qrCode && !status.connected) {
         checkWhatsAppStatus()
       }
     }, 3000)
     
     return () => clearInterval(interval)
-  }, [status.qrCode, loading])
+  }, [status.qrCode, status.connected])
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout
+    
+    if (status.qrCode && !status.connected && qrTimer > 0) {
+      timer = setInterval(() => {
+        setQrTimer(prev => {
+          if (prev <= 1) {
+            // QR Code expirou, gerar novo
+            connectWhatsApp()
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+    }
+    
+    return () => clearInterval(timer)
+  }, [qrTimer, status.qrCode, status.connected])
 
   const checkWhatsAppStatus = async () => {
     try {

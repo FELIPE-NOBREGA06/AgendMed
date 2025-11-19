@@ -65,6 +65,28 @@ export async function POST(request: NextRequest) {
       console.log('Erro no Business API, usando fallback:', businessError)
     }
 
+    // QR Code REAL para WhatsApp
+    try {
+      console.log('📱 Gerando QR Code REAL para WhatsApp')
+      
+      // Usar API de QR Code real
+      const qrResponse = await fetch(`${request.nextUrl.origin}/api/whatsapp/qr-real`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action: 'generate' })
+      })
+      
+      if (qrResponse.ok) {
+        const data = await qrResponse.json()
+        return NextResponse.json(data)
+      }
+
+    } catch (qrError) {
+      console.log('Erro no QR Code real, usando fallback:', qrError)
+    }
+
     // Fallback: QR Code simples
     try {
       console.log('🔌 Usando fallback QR Code')

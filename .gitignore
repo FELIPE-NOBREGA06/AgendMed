@@ -41,6 +41,7 @@ whatsapp-dashboard-status.json
 agendamentos-lembretes.json
 .wwebjs_auth/
 .wwebjs_cache/
+whatsapp-free/
 
 # Screenshots e arquivos de teste
 *.png
@@ -60,3 +61,12 @@ scripts/dev-tools/
 
 # Arquivos temporários do WhatsApp
 whatsapp-interface-test.png
+
+# Documentação antiga/desnecessária
+docs/CONFIGURACAO_WHATSAPP_PASSO_A_PASSO.md
+docs/LIMPEZA_CONCLUIDA.md
+docs/VERCEL_WHATSAPP_DEMO.md
+docs/WHATSAPP_BUSINESS_SETUP.md
+docs/WHATSAPP_VERCEL_ISSUE.md
+docs/RAILWAY_DEPLOY.md
+docs/RENDER_DEPLOY.md
